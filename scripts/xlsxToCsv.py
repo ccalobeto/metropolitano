@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 
-input_folder = '/Users/carlosalbertoleonliza/developer/projects/tutorials/datasets/atu-metropolitano/test'
+input_folder = '/Users/carlosalbertoleonliza/developer/projects/tutorials/datasets/atu-metropolitano/Alimentadores_'
 output_folder = './data'
 
 data_types = {
@@ -12,6 +12,7 @@ data_types = {
 dataframes = []
 
 list_main_folder = os.listdir(input_folder)
+# list_main_folder = ['ENERO']
 
 for folder in list_main_folder:
   if folder != '.DS_Store':

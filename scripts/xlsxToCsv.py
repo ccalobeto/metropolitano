@@ -35,8 +35,6 @@ for folder in list_main_folder:
         dataframes.append(df)
         
     combined_df = pd.concat(dataframes, ignore_index=True)
-    output_filePath = os.path.join(output_folder, folder.lower() + '_2025.csv')
+    output_filePath = os.path.join(output_folder, folder.lower() + '_2025.parquet')
     print(f'Processing filePath: {output_filePath}, Total rows: {len(combined_df)}')
-    combined_df.to_csv(output_filePath, index=False)
-
-    print(f'rows of {folder}: \n', combined_df.head(2))
+    combined_df.to_parquet(output_filePath, index=False)

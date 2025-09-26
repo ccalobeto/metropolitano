@@ -1,0 +1,42 @@
+Buenos días 
+Mi nombre es Carlos Leon y soy Ingeniero de Datos y de antemano les agradezco sobre la información proporcionada sobre la cantidad abordajes en cada paradero/estación de servicio del metropolitano.
+El proyecto en general tiene las siguientes características:
+- Cada registro es el abordaje de un usuario en cada una de las paraderos/estaciones del sistema. 
+- Cada usuario ingresa a su bus alimentador o troncal usando su tarjeta.
+- La información de la troncal como de los buses añimentadores debe tener la misma ventana de tiempo para el análisis.
+
+Conocido las características del proyecto, les tengo algunas preguntas sobre la data proporcionada.
+Sobre la data de Alimentadores:
+- Que significa ruta "desconocida"?
+- Olvidé solicitar el catálogo de datos para comprender los nombres de las columnas. Por favor hacer una ligera descripción:
+#Operador
+Operador	
+Ubicacion	
+Fecha	
+Hora	
+Nombre del titulo	
+Ruta	
+Paradero	
+Monto S/.
+
+Sobre la data de Troncales:
+- Revisé y no hay data completa de días de los meses de abril y junio; y no hay dat disponible de enero a marzo. Quizas no me supe explicar bien, es importante incluir la data de todos los abordajes de las troncales. Por favor incluir la data faltante de los meses de enero a abril y Junio, para tener la misma ventana de análisis que los alimentadores.
+- Hacer una ligera descripción de los siguientes campos:
+block_id	
+Fecha_Incidencia	
+route_name	
+TP_SNAME	
+direction_description	
+Salida	
+POD	
+Hora_Sched	
+deviation	
+vehicle_id	
+mes
+
+Data Adicional
+- Para enlazar la data entre los varios exceles proporcionados es necesario completar la información de códigos de paraderos alimentadores y nombres de estaciones de las troncales para mejorar la Presentación. Estos incluyen datos geográficos para poder visualizar en un mapa la cantidad de abordajes en cada paradero/estación. 
+
+
+
+

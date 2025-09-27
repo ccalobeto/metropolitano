@@ -30,7 +30,8 @@ def process_month(month_dir: pathlib.Path):
     dataframes = []
     for f in all_files:
         try:
-            df = pd.read_excel(f, engine="openpyxl")
+            df = pd.read_excel(f, engine="openpyxl", skiprows=2, header=1)
+            df = df.loc[:, ~df.columns.str.contains("^Unnamed")]  # remove ghost cols
             dataframes.append(df)
             print(f"📥 Loaded {f.name} ({len(df)} rows)")
         except Exception as e:

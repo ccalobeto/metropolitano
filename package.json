@@ -1,0 +1,9 @@
+{
+  "name": "metropolitano-etl",
+  "version": "1.0.0",
+  "scripts": {
+    "convert": "python src/converter.py",
+    "git-commit": "git add \"datasets/*.csv.gz\" && git commit -m 'Update monthly csv.gz files' || echo 'No changes to commit'",
+    "git-upload": "npm run convert && npm run git-commit && git push origin main"
+  }
+}

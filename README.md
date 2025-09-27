@@ -1,53 +1,9 @@
 # Metropolitano Project
 
-# Content
+The present work will discoever some insights related to the metropolitan service in Lima city.
 
-## Convert xlsx to parquet files
-The python script will fetch all the xlsx files from `/Users/carlosalbertoleonliza/developer/projects/tutorials/datasets/atu-metropolitano` and export parquet files to `./data`. 
+For more details related to the project, see [notes.md](/notes.md)
 
-Run
-```sh
-python ./scripts/xlsxToCsv.py
-```
-or 
-```sh
-python ./scripts/xlsxToCsvTroncales.py
-```
+To execute the project do the following
 
-## Make some statistics in clickhouse client
-### Alimentadores
-Counting rows
-```sql
-select count() from file('./atu/*.parquet')
-```
-
-Query of missing data
-```sql
-SELECT DISTINCT
-    Ruta,
-    Paradero
-FROM file('./atu/*.parquet')
-ORDER BY
-    Ruta ASC,
-    Paradero ASC
-INTO OUTFILE './user_files/paraderos-alimentadores.csv'
-```
-
-### Troncales
-
-Counting rows
-```sql
-select count() from file('./atu/troncales_2025.parquet') 
-```
-
-Query data
-```sql
-SELECT DISTINCT
-    route_name,
-    TP_SNAME
-FROM file('./atu/troncales_2025.parquet')
-ORDER BY
-    route_name ASC,
-    TP_SNAME ASC
-INTO OUTFILE './user_files/paraderos-troncales.csv'
-```
+1. Install the library requeriments: `conda install requeriments.txt`

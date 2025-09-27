@@ -1,5 +1,4 @@
 .DS_Store
-data/input/Rutas*
-data/output/parquet
-data
+datasets/input/
+datasets/output/
 utils

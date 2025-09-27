@@ -1,8 +1,9 @@
+import argparse
 import pandas as pd
 import pathlib
 
-INPUT_DIR = pathlib.Path("data/input/test")
-OUTPUT_DIR = pathlib.Path("data/output")
+INPUT_DIR = pathlib.Path("datasets/input/test")
+OUTPUT_DIR = pathlib.Path("datasets/")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 MAP_MONTHS = {
     "ENERO": "01",
@@ -30,9 +31,11 @@ def process_month(month_dir: pathlib.Path):
     dataframes = []
     for f in all_files:
         try:
-            df = pd.read_excel(f, engine="openpyxl")
+            df = pd.read_excel(f, engine="openpyxl", skiprows=2, header=1)
+            # remove ghost cols
+            df = df.loc[:, ~df.columns.str.contains("^Unnamed")]  
             dataframes.append(df)
-            print(f"📥 Loaded {f.name} ({len(df)} rows)")
+            print(f"Loaded {f.name} ({len(df)} rows)")
         except Exception as e:
             print(f"❌ Failed to load {f}: {e}")
 
@@ -42,6 +45,12 @@ def process_month(month_dir: pathlib.Path):
 
     # Concatenate daily files into one monthly dataframe
     combined = pd.concat(dataframes, ignore_index=True)
+    
+    # combine 'Fecha' and 'Hora' into single datetime column
+    combined['Fecha'] = pd.to_datetime(
+        combined['Fecha'].dt.strftime('%Y-%m-%d') + ' ' + combined['Hora'], format='%Y-%m-%d %H:%M:%S'
+    )
+    combined.drop(['Hora'], axis=1, inplace=True)
 
     # Filename pattern
     month = MAP_MONTHS[month_dir.name]  # e.g. "2025-01"
@@ -52,15 +61,27 @@ def process_month(month_dir: pathlib.Path):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--month", help="Process only this month (e.g. 'ENERO')")
+    args = parser.parse_args()
+
+    if args.month:
+        month_dir = INPUT_DIR / args.month
+        if month_dir.exists():
+            process_month(month_dir)
+        else:
+            print(f"⚠️ Month folder not found: {args.month}")
+            
+    else:
     # Each subfolder = one month
-    month_dirs = [d for d in INPUT_DIR.iterdir() if d.is_dir()]
+        month_dirs = [d for d in INPUT_DIR.iterdir() if d.is_dir()]
 
-    if not month_dirs:
-        print("⚠️ No month subfolders found in data/input/")
-        return
+        if not month_dirs:
+            print("⚠️ No month subfolders found in data/input/")
+            return
 
-    for month_dir in sorted(month_dirs):
-        process_month(month_dir)
+        for month_dir in sorted(month_dirs):
+            process_month(month_dir)
 
 
 if __name__ == "__main__":

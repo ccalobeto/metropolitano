@@ -1,0 +1,53 @@
+name: Convert Excel to Monthly CSV.GZ
+
+on:
+  push:
+    branches:
+      - "**" # run on all branches
+    paths:
+      - "data/input/test/**.xlsx"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Find changed months
+        id: changed
+        run: |
+          echo "MONTHS=$(git diff --name-only HEAD^ HEAD || git diff --name-only HEAD | \
+            grep '^data/input/test/' | \
+            grep '\.xlsx$' | \
+            cut -d'/' -f3 | sort -u | xargs)" >> $GITHUB_ENV
+
+      - name: Debug changed files
+        run: |
+          echo "Changed files:"
+          git diff --name-only HEAD^ HEAD || git diff --name-only HEAD
+          echo "Months detected: $MONTHS"
+
+      - name: Run converter only for changed months
+        run: |
+          for MONTH in $MONTHS; do
+            echo "Processing $MONTH..."
+            python src/converter.py --month $MONTH
+          done
+
+      - name: Commit results
+        run: |
+          branch="${GITHUB_REF##*/}"
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add data/*.csv.gz
+          git commit -m "Automated monthly conversion: Excel → CSV.GZ" || echo "No changes"
+          git push origin "$branch"

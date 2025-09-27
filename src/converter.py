@@ -32,9 +32,10 @@ def process_month(month_dir: pathlib.Path):
     for f in all_files:
         try:
             df = pd.read_excel(f, engine="openpyxl", skiprows=2, header=1)
-            df = df.loc[:, ~df.columns.str.contains("^Unnamed")]  # remove ghost cols
+            # remove ghost cols
+            df = df.loc[:, ~df.columns.str.contains("^Unnamed")]  
             dataframes.append(df)
-            print(f"📥 Loaded {f.name} ({len(df)} rows)")
+            print(f"Loaded {f.name} ({len(df)} rows)")
         except Exception as e:
             print(f"❌ Failed to load {f}: {e}")
 
@@ -44,6 +45,12 @@ def process_month(month_dir: pathlib.Path):
 
     # Concatenate daily files into one monthly dataframe
     combined = pd.concat(dataframes, ignore_index=True)
+    
+    # combine 'Fecha' and 'Hora' into single datetime column
+    combined['Fecha'] = pd.to_datetime(
+        combined['Fecha'].dt.strftime('%Y-%m-%d') + ' ' + combined['Hora'], format='%Y-%m-%d %H:%M:%S'
+    )
+    combined.drop(['Hora'], axis=1, inplace=True)
 
     # Filename pattern
     month = MAP_MONTHS[month_dir.name]  # e.g. "2025-01"

@@ -54,7 +54,7 @@ def process_month(month_dir: pathlib.Path):
 
     # Filename pattern
     month = MAP_MONTHS[month_dir.name]  # e.g. "2025-01"
-    out_path = OUTPUT_DIR / f"metropolitano_tripdata_2025-{month}.csv.gz"
+    out_path = OUTPUT_DIR / f"alimentadores_tripdata_2025-{month}.csv.gz"
 
     combined.to_csv(out_path, index=False, compression="gzip")
     print(f"✅ Wrote {out_path} ({len(combined)} rows total)")

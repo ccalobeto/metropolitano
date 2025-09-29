@@ -7,7 +7,10 @@ With this project i am going to get the certification of [Data Engineering zoomc
 To execute the project do the following
 
 1. Install the library requeriments: `conda install requeriments.txt`
-2. To upload `csv.gz` files in github `npm run git-upload`
+2. Upload `csv.gz` files in github `npm run git-upload`
+3. Upload `csv` files into GCS bucket
+4. Transform tables in BigQuery
+5. See metrics in observablehq
 
 ## Scope
 
@@ -23,7 +26,7 @@ The project is divided into two parts:
 The `src/converter.py` script has the following features:
 
 - The script reads daily `xlsx` files of each month (subfolder) and converts into a `csv.gz` compressed file month by month
-- By default the script has the hability to process all the folders, but can also process a single subfolder entering the parameter `src/converter.py --month JULIO`.
+- By default the script has the hability to process all the folders, but can also process a single subfolder entering the parameter **--month** like `src/converter.py --month JULIO`.
 - You can use `npm run git-upload` to automate the process, see `package.json` file.
 
 ## 2.0 Build an ELT pipeline
@@ -34,3 +37,25 @@ The process is represented by these tasks:
 - Load into GCS bucket
 - Transform the compressed files into analytical tables in BQ
 - Show key metrics or insights in an observablehq notebook
+
+### 2.1 Upload `csv` files to GCS Bucket
+
+- Quick GCP setup
+  - Create project account
+  - Create your service account, give it *permissions* and add a key
+  - Place the key in a safety place in your computer
+- `src/IaC` has all the code to create gcp resources
+- Setup Kestra
+  - `docker compose up -d` to spin up kestra and postgres db containers
+  - Go to `http://localhost:18080`
+  - Copy scripts `gcp-kv.yaml` and `gcp_taxi_scheduled.yalm` to kestra flows
+
+    ```sh
+    curl -u admin@kestra.io:Admin1234 -X POST http://localhost:18080/api/v1/flows/import \
+    -F "fileUpload=@flows/gcp_kv.yaml"
+
+    ```
+
+  - Add key **GOOGLE_CREDENTIALS_ID** in *KV Store* with your service account key
+
+  - Execute `.yaml` scrips in kestra

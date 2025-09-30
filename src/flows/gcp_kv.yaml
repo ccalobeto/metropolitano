@@ -1,5 +1,5 @@
 id: gcp_kv
-namespace: metropolitano
+namespace: rides
 
 tasks:
   - id: gcp_project_id

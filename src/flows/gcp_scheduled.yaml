@@ -1,0 +1,139 @@
+id: gcp_scheduled
+namespace: rides
+description: |
+  Best to add a label `backfill:true` from the UI to track executions created via a backfill.
+  CSV data used here comes from: https://raw.githubusercontent.com/ccalobeto/metropolitano/main/datasets/
+
+inputs:
+  - id: metropolitano
+    type: SELECT
+    displayName: Select metropolitano type
+    values: [alimentadores, troncales]
+    defaults: alimentadores
+
+variables:
+  file: "{{inputs.metropolitano}}_tripdata_{{trigger.date | date('yyyy-MM')}}.csv"
+  gcs_file: "gs://{{kv('GCP_BUCKET_NAME')}}/{{inputs.metropolitano}}/{{vars.file}}"
+  table: "{{kv('GCP_DATASET')}}.{{inputs.metropolitano}}_tripdata_{{trigger.date | date('yyyy_MM')}}"
+  data: "{{outputs.extract.outputFiles[inputs.metropolitano ~ '_tripdata_' ~ (trigger.date | date('yyyy-MM')) ~ '.csv']}}"
+
+tasks:
+  - id: set_label
+    type: io.kestra.plugin.core.execution.Labels
+    labels:
+      file: "{{render(vars.file)}}"
+      metropolitano: "{{inputs.metropolitano}}"
+
+  - id: extract
+    type: io.kestra.plugin.scripts.shell.Commands
+    outputFiles:
+      - "*.csv"
+    taskRunner:
+      type: io.kestra.plugin.core.runner.Process
+    commands:
+      - wget -qO- https://raw.githubusercontent.com/ccalobeto/metropolitano/main/datasets/{{inputs.metropolitano}}/{{render(vars.file)}}.gz | gunzip > {{render(vars.file)}}
+
+  - id: upload_to_gcs
+    type: io.kestra.plugin.gcp.gcs.Upload
+    from: "{{render(vars.data)}}"
+    to: "{{render(vars.gcs_file)}}"
+
+  - id: create_alimentadores_tbl
+    type: io.kestra.plugin.core.storage.FileRead
+    from: /app/storage/queries/create_alimentadores_tbl.sql
+
+  - id: create_alimentadores_ext
+    type: io.kestra.plugin.core.storage.FileRead
+    from: /app/storage/queries/create_alimentadores_ext.sql
+  
+  - id: create-alimentadores-tmp
+    type: io.kestra.plugin.core.fs.FileRead
+    from: /app/storage/queries/create-alimentadores-tmp.sql
+
+  - id: merge-alimentadores
+    type: io.kestra.plugin.core.fs.FileRead
+    from: /app/storage/queries/merge-alimentadores.sql
+
+  # troncales tasks end here
+  - id: create-troncales-tbl
+    type: io.kestra.plugin.core.fs.FileRead
+    from: /app/storage/queries/create-troncales-tbl.sql
+
+  - id: create-troncales-ext
+    type: io.kestra.plugin.core.fs.FileRead
+    from: /app/storage/queries/create-troncales-ext.sql
+
+  - id: create-troncales-tmp
+    type: io.kestra.plugin.core.fs.FileRead
+    from: /app/storage/queries/create-troncales-tmp.sql
+
+  - id: merge-troncales
+    type: io.kestra.plugin.core.fs.FileRead
+    from: /app/storage/queries/merge-troncales.sql
+
+  - id: if_alimentadores_metropolitano
+    type: io.kestra.plugin.core.flow.If
+    condition: "{{inputs.metropolitano == 'alimentadores'}}"
+    then:
+      - id: bq_alimentadores_tripdata
+        type: io.kestra.plugin.gcp.bigquery.Query
+        sql: "{{ outputs.create_alimentadores_ext.value }}"
+
+      - id: bq_alimentadores_table_tmp
+        type: io.kestra.plugin.gcp.bigquery.Query
+        sql: "{{ outputs.create_alimentadores_tmp.value }}"
+
+      - id: bq_alimentadores_merge
+        type: io.kestra.plugin.gcp.bigquery.Query
+        sql: "{{ outputs.merge_alimentadores.value }}"
+
+  - id: if_troncales_metropolitano
+    type: io.kestra.plugin.core.flow.If
+    condition: "{{inputs.metropolitano == 'troncales'}}"
+    then:
+      - id: bq_troncales_tripdata
+        type: io.kestra.plugin.gcp.bigquery.Query
+        sql: "{{ outputs.create-troncales-tbl.value }}" 
+          
+      - id: bq_troncales_table_ext
+        type: io.kestra.plugin.gcp.bigquery.Query
+        sql: "{{ outputs.create-troncales-ext.value }}" 
+          
+      - id: bq_troncales_table_tmp
+        type: io.kestra.plugin.gcp.bigquery.Query
+        sql: "{{ outputs.create-troncales-tmp.value }}"          
+
+      - id: bq_troncales_merge
+        type: io.kestra.plugin.gcp.bigquery.Query
+        sql: "{{ outputs.merge-troncales.value }}" 
+          
+  - id: bq_drop_tmp
+    type: io.kestra.plugin.gcp.bigquery.Query
+    sql: |
+      DROP TABLE IF EXISTS `{{kv('GCP_PROJECT_ID')}}.{{vars.table}}_ext`;
+      DROP TABLE IF EXISTS `{{kv('GCP_PROJECT_ID')}}.{{vars.table}}`;
+
+  - id: purge_files
+    type: io.kestra.plugin.core.storage.PurgeCurrentExecutionFiles
+    description: To avoid cluttering your storage, we will remove the downloaded files
+
+pluginDefaults:
+  - type: io.kestra.plugin.gcp
+    values:
+      serviceAccount: "{{kv('GOOGLE_CREDENTIALS_ID')}}"
+      projectId: "{{kv('GCP_PROJECT_ID')}}"
+      location: "{{kv('GCP_LOCATION')}}"
+      bucket: "{{kv('GCP_BUCKET_NAME')}}"
+
+triggers:
+  - id: alimentadores_schedule
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 9 1 * *"
+    inputs:
+      metropolitano: alimentadores
+
+  - id: troncales_schedule
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 10 1 * *"
+    inputs:
+      metropolitano: troncales

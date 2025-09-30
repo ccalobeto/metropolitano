@@ -19,6 +19,17 @@ MAP_MONTHS = {
     "NOVIEMBRE": "11",
     "DICIEMBRE": "12",
 }
+MAP_COLUMNS = {
+    "# Operador": "operador_id",
+    "Operador": "operador",
+    "Ubicacion": "ubicacion",
+    "Fecha": "fecha_hora",
+    "Nombre del titulo": "nombre_titulo",
+    "Ruta": "ruta",
+    "Paradero": "paradero",
+    "Monto S/.": "monto",
+
+}
 
 
 def process_month(month_dir: pathlib.Path):
@@ -51,6 +62,8 @@ def process_month(month_dir: pathlib.Path):
         combined['Fecha'].dt.strftime('%Y-%m-%d') + ' ' + combined['Hora'], format='%Y-%m-%d %H:%M:%S'
     )
     combined.drop(['Hora'], axis=1, inplace=True)
+    # rename columns
+    combined.rename(columns=MAP_COLUMNS, inplace=True)
 
     # Filename pattern
     month = MAP_MONTHS[month_dir.name]  # e.g. "2025-01"

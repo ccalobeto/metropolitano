@@ -3,7 +3,7 @@ import pandas as pd
 import pathlib
 
 INPUT_DIR = pathlib.Path("datasets/input/Alimentadores")
-OUTPUT_DIR = pathlib.Path("datasets/")
+OUTPUT_DIR = pathlib.Path("datasets/alimentadores/")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 MAP_MONTHS = {
     "ENERO": "01",

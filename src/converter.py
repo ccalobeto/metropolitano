@@ -44,7 +44,9 @@ def process_month(month_dir: pathlib.Path):
         try:
             df = pd.read_excel(f, engine="openpyxl", skiprows=2, header=1)
             # remove ghost cols
-            df = df.loc[:, ~df.columns.str.contains("^Unnamed")]  
+            df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
+            # remove leading/trailing whitespace from string columns
+            df = df.map(lambda x: x.strip() if isinstance(x, str) else x)
             dataframes.append(df)
             print(f"Loaded {f.name} ({len(df)} rows)")
         except Exception as e:

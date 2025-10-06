@@ -1,0 +1,32 @@
+MERGE INTO `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.troncales_tripdata` T USING `{{kv('GCP_PROJECT_ID')}}.{{render(vars.table)}}` S ON T.unique_row_id = S.unique_row_id
+WHEN NOT MATCHED THEN
+INSERT
+  (
+    unique_row_id,
+    filename,
+    block_id,
+    fecha_hora_incidencia,
+    route_name,
+    tp_sname,
+    direction_description,
+    pod,
+    hora_sched,
+    deviation,
+    vehicle_id,
+    mes
+  )
+VALUES
+  (
+    S.unique_row_id,
+    S.filename,
+    S.block_id,
+    S.fecha_hora_incidencia,
+    S.route_name,
+    S.tp_sname,
+    S.direction_description,
+    S.pod,
+    S.hora_sched,
+    S.deviation,
+    S.vehicle_id,
+    S.mes
+  );

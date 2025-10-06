@@ -1,0 +1,22 @@
+[
+  {
+    "name": "vendor_id",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "pickup_datetime",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "dropoff_datetime",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "passenger_count",
+    "type": "INTEGER",
+    "mode": "NULLABLE"
+  }
+]

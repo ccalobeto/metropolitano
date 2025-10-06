@@ -47,8 +47,8 @@ The process is represented by these tasks:
 - `src/IaC` has all the code to create gcp resources
 - Setup Kestra
   - `docker compose up -d` to spin up kestra and postgres db containers
-  - Go to `http://localhost:18080`
-  - Copy scripts `gcp-kv.yaml` and `gcp_taxi_scheduled.yalm` to kestra flows
+  - Go to `http://localhost:18080` and give credentials placed in **KESTRA_CONFIGURATION** inside `docker-compose.yml`
+  - Copy scripts `gcp-kv.yaml` and `gcp_taxi_scheduled.yalm` to kestra flows via *curl* like this
 
     ```sh
     curl -u admin@kestra.io:Admin1234 -X POST http://localhost:18080/api/v1/flows/import \
@@ -56,6 +56,8 @@ The process is represented by these tasks:
 
     ```
 
-  - Add key **GOOGLE_CREDENTIALS_ID** in *KV Store* with your service account key
+  - Add key **GOOGLE_CREDENTIALS_ID** in *KV Store* with your service account, copy the hole json key
 
   - Execute `.yaml` scrips in kestra
+    - Execute `gcp_kv.yaml` to create kestra internal variables
+    - Execute `gcp_scheduled.yaml` to perform ETL

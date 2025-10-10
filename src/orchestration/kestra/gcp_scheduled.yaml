@@ -71,6 +71,9 @@ tasks:
             paradero STRING OPTIONS (description = 'Stop or station name from CSV.'),
             monto NUMERIC OPTIONS (
                 description = 'Fare amount in local currency from CSV.'
+            ),
+            loaded_date DATE OPTIONS (
+                description = 'The date when the record was loaded into BigQuery.'
             )
           ) PARTITION BY DATE(fecha_hora);
 
@@ -126,7 +129,8 @@ tasks:
               )
             ) AS unique_row_id,
             "{{render(vars.file)}}" AS filename,
-            *
+            *,
+            DATE(CURRENT_TIMESTAMP()) AS loaded_date
           FROM
             `{{kv('GCP_PROJECT_ID')}}.{{render(vars.table)}}_ext`;
 
@@ -146,7 +150,8 @@ tasks:
               nombre_titulo,
               ruta,
               paradero,
-              monto
+              monto, 
+              loaded_date
             )
           VALUES
             (
@@ -159,7 +164,8 @@ tasks:
               S.nombre_titulo,
               S.ruta,
               S.paradero,
-              S.monto
+              S.monto,
+              S.loaded_date
             );
 
   # - id: if_troncales_metropolitano

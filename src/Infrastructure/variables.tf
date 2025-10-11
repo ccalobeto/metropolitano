@@ -20,7 +20,7 @@ variable "location" {
 
 variable "bq_dataset_name" {
   description = "BigQuery dataset name"
-  default     = "portafolio"
+  default     = "metropolitano"
 }
 
 variable "bq_table_name" {

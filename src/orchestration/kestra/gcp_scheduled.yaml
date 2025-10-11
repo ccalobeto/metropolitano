@@ -5,24 +5,24 @@ description: |
   CSV data used here comes from: https://raw.githubusercontent.com/ccalobeto/metropolitano/main/datasets/
 
 inputs:
-  - id: metropolitano
+  - id: service
     type: SELECT
-    displayName: Select metropolitano type
+    displayName: Select service type
     values: [alimentadores, troncales]
     defaults: alimentadores
 
 variables:
-  file: "{{inputs.metropolitano}}_tripdata_{{trigger.date | date('yyyy-MM')}}.csv"
-  gcs_file: "gs://{{kv('GCP_BUCKET_NAME')}}/{{inputs.metropolitano}}/{{vars.file}}"
-  table: "{{kv('GCP_DATASET')}}.{{inputs.metropolitano}}_tripdata_{{trigger.date | date('yyyy_MM')}}"
-  data: "{{outputs.extract.outputFiles[inputs.metropolitano ~ '_tripdata_' ~ (trigger.date | date('yyyy-MM')) ~ '.csv']}}"
+  file: "{{inputs.service}}_tripdata_{{trigger.date | date('yyyy-MM')}}.csv"
+  gcs_file: "gs://{{kv('GCP_BUCKET_NAME')}}/metropolitano/{{inputs.service}}/{{vars.file}}"
+  table: "{{kv('GCP_DATASET')}}.{{inputs.service}}_tripdata_{{trigger.date | date('yyyy_MM')}}"
+  data: "{{outputs.extract.outputFiles[inputs.service ~ '_tripdata_' ~ (trigger.date | date('yyyy-MM')) ~ '.csv']}}"
 
 tasks:
   - id: set_label
     type: io.kestra.plugin.core.execution.Labels
     labels:
       file: "{{render(vars.file)}}"
-      metropolitano: "{{inputs.metropolitano}}"
+      service: "{{inputs.service}}"
 
   - id: extract
     type: io.kestra.plugin.scripts.shell.Commands
@@ -31,16 +31,16 @@ tasks:
     taskRunner:
       type: io.kestra.plugin.core.runner.Process
     commands:
-      - wget -qO- https://raw.githubusercontent.com/ccalobeto/metropolitano/main/datasets/{{inputs.metropolitano}}/{{render(vars.file)}}.gz | gunzip > {{render(vars.file)}}
+      - wget -qO- https://raw.githubusercontent.com/ccalobeto/metropolitano/main/datasets/{{inputs.service}}/{{render(vars.file)}}.gz | gunzip > {{render(vars.file)}}
 
   - id: upload_to_gcs
     type: io.kestra.plugin.gcp.gcs.Upload
     from: "{{render(vars.data)}}"
     to: "{{render(vars.gcs_file)}}"
 
-  - id: if_alimentadores_metropolitano
+  - id: if_alimentadores_service
     type: io.kestra.plugin.core.flow.If
-    condition: "{{inputs.metropolitano == 'alimentadores'}}"
+    condition: "{{inputs.service == 'alimentadores'}}"
     then:
       - id: bq_alimentadores_tripdata
         type: io.kestra.plugin.gcp.bigquery.Query
@@ -168,9 +168,9 @@ tasks:
               S.loaded_date
             );
 
-  # - id: if_troncales_metropolitano
+  # - id: if_troncales_service
   #   type: io.kestra.plugin.core.flow.If
-  #   condition: "{{inputs.metropolitano == 'troncales'}}"
+  #   condition: "{{inputs.service == 'troncales'}}"
   #   then:
   #     - id: bq_troncales_tripdata
   #       type: io.kestra.plugin.gcp.bigquery.Query
@@ -211,10 +211,10 @@ triggers:
     type: io.kestra.plugin.core.trigger.Schedule
     cron: "0 9 1 * *"
     inputs:
-      metropolitano: alimentadores
+      service: alimentadores
 
   - id: troncales_schedule
     type: io.kestra.plugin.core.trigger.Schedule
     cron: "0 10 1 * *"
     inputs:
-      metropolitano: troncales
+      service: troncales

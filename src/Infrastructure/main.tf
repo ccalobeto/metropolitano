@@ -38,8 +38,8 @@ resource "google_bigquery_dataset" "dataset_portafolio" {
 
 # BigQuery table, put the path to reach the table in dataset_id
 resource "google_bigquery_table" "table_demo" {
-  dataset_id = google_bigquery_dataset.dataset_portafolio.dataset_id
-  table_id   = var.bq_table_name
-
-  schema = file("schema.json")
+  dataset_id          = google_bigquery_dataset.dataset_portafolio.dataset_id
+  table_id            = var.bq_table_name
+  deletion_protection = false
+  schema              = file("schema.json")
 }

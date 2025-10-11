@@ -24,4 +24,4 @@ tasks:
     type: io.kestra.plugin.core.kv.Set
     key: GCP_DATASET
     kvType: STRING
-    value: portafolio # TODO make sure it's globally
+    value: metropolitano # TODO make sure it's globally

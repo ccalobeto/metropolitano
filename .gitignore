@@ -2,6 +2,6 @@
 datasets/input/
 datasets/output/
 utils
-.terraform/
-.terraform.lock.hcl
-terraform.tfstate.*
+src/Infrastructure/.terraform/
+src/Infrastructure/.terraform.lock.hcl
+src/Infrastructure/terraform.tfstate*
